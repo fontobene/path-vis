@@ -1,0 +1,20 @@
+{
+    "name": "path-vis",
+    "main": "./src/index.js",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "build": "webpack",
+        "watch": "webpack --watch",
+        "test": "elm test",
+        "dev": "webpack-dev-server --port 8000"
+    },
+    "devDependencies": {
+        "copy-webpack-plugin": "^4.2.3",
+        "elm-webpack-loader": "^4.4.0",
+        "file-loader": "^1.1.5",
+        "style-loader": "^0.13.1",
+        "webpack": "^3.8.1",
+        "webpack-dev-server": "^2.9.4"
+    }
+}
