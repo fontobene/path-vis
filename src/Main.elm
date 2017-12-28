@@ -101,7 +101,8 @@ parseCoordinate input =
 view : Model -> Html Msg
 view model =
     div []
-        [ p [] [ text "Enter a FontoBene path expression!" ]
+        [ h1 [] [ text "FontoBene Visualizer" ]
+        , p [] [ text "Enter a FontoBene path expression!" ]
         , input [ type_ "text", placeholder "Coordinates", onInput CoordinateString ] []
         , br [] []
         , p [] [ text (toString model.coordinates) ]
@@ -320,6 +321,8 @@ drawLine prevCoord coord =
                         ]
 
 
+{-| Convert degrees to radians.
+-}
 degreesToRadians : Float -> Float
 degreesToRadians deg =
     deg * pi / 180
