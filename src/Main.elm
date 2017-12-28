@@ -267,7 +267,13 @@ drawLine prevCoord coord =
                                     ++ radius
                                     ++ ","
                                     ++ radius
-                                    ++ " 0 0,1 "
+                                    ++ " 0 0,"
+                                    ++ (if deg >= 0 then
+                                            "0"
+                                        else
+                                            "1"
+                                       )
+                                    ++ " "
                                     ++ (toString xx)
                                     ++ ","
                                     ++ (toString yy)
