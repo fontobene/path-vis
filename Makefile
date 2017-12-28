@@ -1,6 +1,6 @@
 SSH_HOST=example.com
 SSH_PORT=22
-SSH_USER=fontoene
+SSH_USER=fontobene
 SSH_TARGET_DIR=/srv/www/pathvis/
 
 help:

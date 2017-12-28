@@ -4,8 +4,9 @@ import Html exposing (..)
 import Html.Attributes exposing (placeholder, type_)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (combine)
-import Svg exposing (Svg, svg, g, circle, line)
-import Svg.Attributes exposing (cx, cy, r, x1, x2, y1, y2, height, width, stroke, strokeWidth, viewBox)
+import Svg exposing (Svg, svg, g, circle, line, path)
+import Svg.Attributes exposing (cx, cy, r, x1, x2, y1, y2, d)
+import Svg.Attributes exposing (height, width, stroke, strokeWidth, viewBox, fill)
 
 
 main : Program Never Model Msg
@@ -171,53 +172,155 @@ drawPolyline coords =
 
 drawCoordinate : Coordinate -> Coordinate -> Svg Msg
 drawCoordinate prevCoord coord =
+    g
+        []
+        [ drawPoint coord
+        , drawLine prevCoord coord
+        ]
+
+
+fixY : Float -> Float
+fixY val =
+    9 - val
+
+
+getCoords : Coordinate -> ( Float, Float )
+getCoords coord =
     case coord of
         Point x y ->
-            g []
-                [ drawPoint coord
-                , drawLine prevCoord coord
-                ]
-
-        Arc x y a ->
-            g []
-                [ drawPoint coord
-                ]
-
-
-getSvgCoords : Coordinate -> ( String, String )
-getSvgCoords coord =
-    case coord of
-        Point x y ->
-            ( toString x, toString <| 9 - y )
+            ( x, fixY y )
 
         Arc x y _ ->
-            ( toString x, toString <| 9 - y )
+            ( x, fixY y )
 
 
 drawPoint : Coordinate -> Svg Msg
 drawPoint coord =
     let
         ( x, y ) =
-            getSvgCoords coord
+            getCoords coord
     in
-        circle [ cx x, cy y, r "0.2" ] []
+        circle [ cx (toString x), cy (toString y), r "0.2" ] []
 
 
 drawLine : Coordinate -> Coordinate -> Svg Msg
-drawLine c1 c2 =
+drawLine prevCoord coord =
     let
         ( x, y ) =
-            getSvgCoords c1
-
-        ( xx, yy ) =
-            getSvgCoords c2
+            getCoords prevCoord
     in
-        line
-            [ x1 x
-            , y1 y
-            , x2 xx
-            , y2 yy
-            , stroke "black"
-            , strokeWidth "0.1"
-            ]
-            []
+        case coord of
+            Point xx yy ->
+                line
+                    [ x1 (x |> toString)
+                    , y1 (y |> toString)
+                    , x2 (xx |> toString)
+                    , y2 (yy |> fixY |> toString)
+                    , stroke "black"
+                    , strokeWidth "0.1"
+                    ]
+                    []
+
+            Arc xx yy_ a ->
+                let
+                    yy =
+                        fixY yy_
+
+                    deg =
+                        a * 20
+
+                    length =
+                        sqrt ((xx - x) ^ 2 + (yy - y) ^ 2)
+
+                    radius =
+                        toString <| degreesToRadius deg length
+
+                    midX =
+                        (x + xx) / 2
+
+                    midY =
+                        (y + yy) / 2
+
+                    orthVecX =
+                        -(yy - y) / length
+
+                    orthVecY =
+                        (xx - x) / length
+
+                    orthVecLen =
+                        (length / 2) / tan ((degreesToRadians deg) / 2)
+
+                    centerX =
+                        (xx + x) / 2 + orthVecX * orthVecLen
+
+                    centerY =
+                        (yy + y) / 2 + orthVecY * orthVecLen
+                in
+                    g []
+                        [ path
+                            [ d
+                                ("M"
+                                    ++ (toString x)
+                                    ++ ","
+                                    ++ (toString y)
+                                    ++ " A"
+                                    ++ radius
+                                    ++ ","
+                                    ++ radius
+                                    ++ " 0 0,1 "
+                                    ++ (toString xx)
+                                    ++ ","
+                                    ++ (toString yy)
+                                )
+                            , fill "none"
+                            , stroke "black"
+                            , strokeWidth "0.1"
+                            ]
+                            []
+                        , line
+                            [ x1 (x |> toString)
+                            , y1 (y |> toString)
+                            , x2 (centerX |> toString)
+                            , y2 (centerY |> toString)
+                            , stroke "red"
+                            , strokeWidth "0.1"
+                            ]
+                            []
+                        , line
+                            [ x1 (xx |> toString)
+                            , y1 (yy |> toString)
+                            , x2 (centerX |> toString)
+                            , y2 (centerY |> toString)
+                            , stroke "blue"
+                            , strokeWidth "0.1"
+                            ]
+                            []
+                        , line
+                            [ x1 ((x + xx) / 2 |> toString)
+                            , y1 ((y + yy) / 2 |> toString)
+                            , x2 (centerX |> toString)
+                            , y2 (centerY |> toString)
+                            , stroke "green"
+                            , strokeWidth "0.05"
+                            ]
+                            []
+                        , circle
+                            [ cx (toString midX)
+                            , cy (toString midY)
+                            , r "0.2"
+                            , fill "green"
+                            ]
+                            []
+                        ]
+
+
+degreesToRadians : Float -> Float
+degreesToRadians deg =
+    deg * pi / 180
+
+
+{-| r = \frac{s}{2 \cdot sin(\alpha / 2)}
+-}
+degreesToRadius : Float -> Float -> Float
+degreesToRadius deg length =
+    length / (2 * sin ((degreesToRadians deg) / 2))
