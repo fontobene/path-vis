@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (placeholder, type_, id, for)
+import Html.Attributes exposing (placeholder, type_, id, for, value)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (combine)
 import Svg exposing (Svg, svg, g, circle, line, path)
@@ -33,9 +33,16 @@ type alias Model =
     }
 
 
+initialExpr : String
+initialExpr =
+    "1,1;2,7;7,7,6;8,1"
+
+
 model : Model
 model =
-    Model [] False
+    Model
+        (Maybe.withDefault [] (parseInput initialExpr))
+        False
 
 
 
@@ -110,7 +117,13 @@ view model =
         , p []
             [ text "Enter a FontoBene path expression!" ]
         , div []
-            [ input [ type_ "text", placeholder "Coordinates", onInput CoordinateString ] []
+            [ input
+                [ type_ "text"
+                , placeholder "Coordinates"
+                , onInput CoordinateString
+                , value initialExpr
+                ]
+                []
             ]
         , div []
             [ input [ id "cbxDebug", type_ "checkbox", onInput ToggleDebug ] []
