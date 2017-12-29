@@ -243,10 +243,10 @@ drawLine prevCoord coord =
                         (y + yy) / 2
 
                     orthVecX =
-                        -(yy - y) / length
+                        (yy - y) / length
 
                     orthVecY =
-                        (xx - x) / length
+                        -(xx - x) / length
 
                     orthVecLen =
                         (length / 2) / tan ((degreesToRadians deg) / 2)
