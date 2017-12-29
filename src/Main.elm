@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (placeholder, type_)
+import Html.Attributes exposing (placeholder, type_, id, for)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (combine)
 import Svg exposing (Svg, svg, g, circle, line, path)
@@ -29,12 +29,13 @@ type Coordinate
 
 type alias Model =
     { coordinates : List Coordinate
+    , debug : Bool
     }
 
 
 model : Model
 model =
-    Model []
+    Model [] False
 
 
 
@@ -43,6 +44,7 @@ model =
 
 type Msg
     = CoordinateString String
+    | ToggleDebug String
 
 
 update : Msg -> Model -> Model
@@ -59,6 +61,9 @@ update msg model =
                             []
             in
                 { model | coordinates = coordinates }
+
+        ToggleDebug _ ->
+            { model | debug = not model.debug }
 
 
 parseInput : String -> Maybe (List Coordinate)
@@ -102,13 +107,21 @@ view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "FontoBene Visualizer" ]
-        , p [] [ text "Enter a FontoBene path expression!" ]
-        , input [ type_ "text", placeholder "Coordinates", onInput CoordinateString ] []
-        , br [] []
-        , p [] [ text (toString model.coordinates) ]
+        , p []
+            [ text "Enter a FontoBene path expression!" ]
+        , div []
+            [ input [ type_ "text", placeholder "Coordinates", onInput CoordinateString ] []
+            ]
+        , div []
+            [ input [ id "cbxDebug", type_ "checkbox", onInput ToggleDebug ] []
+            , label [ for "cbxDebug" ] [ text "Debug" ]
+            ]
+        , div []
+            [ p [] [ text <| (toString model.coordinates) ++ ", debug? " ++ (toString model.debug) ]
+            ]
         , svg [ height "200", width "200", viewBox "-0.5 -0.5 10 10" ]
             [ makeGrid
-            , drawPolyline model.coordinates
+            , drawPolyline model.debug model.coordinates
             , circle [ cx "20", cy "20", r "4" ] []
             ]
         ]
@@ -158,8 +171,8 @@ makeGridVertical =
         (List.range 0 9)
 
 
-drawPolyline : List Coordinate -> Svg Msg
-drawPolyline coords =
+drawPolyline : Bool -> List Coordinate -> Svg Msg
+drawPolyline debug coords =
     g [] <|
         (case List.head coords of
             Just coord ->
@@ -168,15 +181,15 @@ drawPolyline coords =
             Nothing ->
                 []
         )
-            ++ (List.map2 drawCoordinate coords (List.drop 1 coords))
+            ++ (List.map2 (drawCoordinate debug) coords (List.drop 1 coords))
 
 
-drawCoordinate : Coordinate -> Coordinate -> Svg Msg
-drawCoordinate prevCoord coord =
+drawCoordinate : Bool -> Coordinate -> Coordinate -> Svg Msg
+drawCoordinate debug prevCoord coord =
     g
         []
         [ drawPoint coord
-        , drawLine prevCoord coord
+        , drawLine debug prevCoord coord
         ]
 
 
@@ -204,8 +217,8 @@ drawPoint coord =
         circle [ cx (toString x), cy (toString y), r "0.2" ] []
 
 
-drawLine : Coordinate -> Coordinate -> Svg Msg
-drawLine prevCoord coord =
+drawLine : Bool -> Coordinate -> Coordinate -> Svg Msg
+drawLine debug prevCoord coord =
     let
         ( x, y ) =
             getCoords prevCoord
@@ -257,7 +270,7 @@ drawLine prevCoord coord =
                     centerY =
                         (yy + y) / 2 + orthVecY * orthVecLen
                 in
-                    g []
+                    g [] <|
                         [ path
                             [ d
                                 ("M"
@@ -284,41 +297,45 @@ drawLine prevCoord coord =
                             , strokeWidth "0.1"
                             ]
                             []
-                        , line
-                            [ x1 (x |> toString)
-                            , y1 (y |> toString)
-                            , x2 (centerX |> toString)
-                            , y2 (centerY |> toString)
-                            , stroke "red"
-                            , strokeWidth "0.1"
-                            ]
-                            []
-                        , line
-                            [ x1 (xx |> toString)
-                            , y1 (yy |> toString)
-                            , x2 (centerX |> toString)
-                            , y2 (centerY |> toString)
-                            , stroke "blue"
-                            , strokeWidth "0.1"
-                            ]
-                            []
-                        , line
-                            [ x1 ((x + xx) / 2 |> toString)
-                            , y1 ((y + yy) / 2 |> toString)
-                            , x2 (centerX |> toString)
-                            , y2 (centerY |> toString)
-                            , stroke "green"
-                            , strokeWidth "0.05"
-                            ]
-                            []
-                        , circle
-                            [ cx (toString midX)
-                            , cy (toString midY)
-                            , r "0.2"
-                            , fill "green"
-                            ]
-                            []
                         ]
+                            ++ if not debug then
+                                []
+                               else
+                                [ line
+                                    [ x1 (x |> toString)
+                                    , y1 (y |> toString)
+                                    , x2 (centerX |> toString)
+                                    , y2 (centerY |> toString)
+                                    , stroke "red"
+                                    , strokeWidth "0.1"
+                                    ]
+                                    []
+                                , line
+                                    [ x1 (xx |> toString)
+                                    , y1 (yy |> toString)
+                                    , x2 (centerX |> toString)
+                                    , y2 (centerY |> toString)
+                                    , stroke "blue"
+                                    , strokeWidth "0.1"
+                                    ]
+                                    []
+                                , line
+                                    [ x1 ((x + xx) / 2 |> toString)
+                                    , y1 ((y + yy) / 2 |> toString)
+                                    , x2 (centerX |> toString)
+                                    , y2 (centerY |> toString)
+                                    , stroke "green"
+                                    , strokeWidth "0.05"
+                                    ]
+                                    []
+                                , circle
+                                    [ cx (toString midX)
+                                    , cy (toString midY)
+                                    , r "0.2"
+                                    , fill "green"
+                                    ]
+                                    []
+                                ]
 
 
 {-| Convert degrees to radians.
