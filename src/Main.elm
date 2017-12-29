@@ -30,6 +30,7 @@ type Coordinate
 type alias Model =
     { coordinates : List Coordinate
     , debug : Bool
+    , expr : String
     }
 
 
@@ -42,6 +43,7 @@ model : Model
 model =
     { coordinates = (Maybe.withDefault [] (parseInput initialExpr))
     , debug = False
+    , expr = initialExpr
     }
 
 
@@ -67,7 +69,7 @@ update msg model =
                         Nothing ->
                             []
             in
-                { model | coordinates = coordinates }
+                { model | expr = string, coordinates = coordinates }
 
         ToggleDebug _ ->
             { model | debug = not model.debug }
@@ -121,7 +123,7 @@ view model =
                 [ type_ "text"
                 , placeholder "Coordinates"
                 , onInput CoordinateString
-                , value initialExpr
+                , value model.expr
                 ]
                 []
             ]
