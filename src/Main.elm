@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (placeholder, type_, id, for, value)
+import Html.Attributes exposing (placeholder, type_, id, for, value, checked)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (combine)
 import Svg exposing (Svg, svg, g, circle, line, path)
@@ -40,9 +40,9 @@ initialExpr =
 
 model : Model
 model =
-    Model
-        (Maybe.withDefault [] (parseInput initialExpr))
-        False
+    { coordinates = (Maybe.withDefault [] (parseInput initialExpr))
+    , debug = False
+    }
 
 
 
@@ -126,7 +126,7 @@ view model =
                 []
             ]
         , div []
-            [ input [ id "cbxDebug", type_ "checkbox", onInput ToggleDebug ] []
+            [ input [ id "cbxDebug", type_ "checkbox", checked model.debug, onInput ToggleDebug ] []
             , label [ for "cbxDebug" ] [ text "Debug" ]
             ]
         , div []
