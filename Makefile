@@ -1,7 +1,7 @@
-SSH_HOST=example.com
+SSH_HOST=fontobene.dbrgn.ch
 SSH_PORT=22
-SSH_USER=fontobene
-SSH_TARGET_DIR=/srv/www/pathvis/
+SSH_USER=danilo
+SSH_TARGET_DIR=/srv/www/dbrgn/fontobene/pathvis/
 
 help:
 	@echo "Use one of the following commands: setup, test, run, clean, dist, deploy"
