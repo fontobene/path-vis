@@ -286,34 +286,46 @@ drawLine debug prevCoord coord =
                         (yy + y) / 2 + orthVecY * orthVecLen
                 in
                     g [] <|
-                        [ path
-                            [ d
-                                ("M"
-                                    ++ (toString x)
-                                    ++ ","
-                                    ++ (toString y)
-                                    ++ " A"
-                                    ++ radius
-                                    ++ ","
-                                    ++ radius
-                                    ++ " 0 0,"
-                                    ++ (if deg >= 0 then
-                                            "0"
-                                        else
-                                            "1"
-                                       )
-                                    ++ " "
-                                    ++ (toString xx)
-                                    ++ ","
-                                    ++ (toString yy)
-                                )
-                            , fill "none"
-                            , stroke "black"
-                            , strokeWidth "0.1"
-                            ]
-                            []
+                        [ if deg == 0 then
+                            -- Straight line
+                            line
+                                [ x1 (x |> toString)
+                                , y1 (y |> toString)
+                                , x2 (xx |> toString)
+                                , y2 (yy |> toString)
+                                , stroke "black"
+                                , strokeWidth "0.1"
+                                ]
+                                []
+                          else
+                            path
+                                [ d
+                                    ("M"
+                                        ++ (toString x)
+                                        ++ ","
+                                        ++ (toString y)
+                                        ++ " A"
+                                        ++ radius
+                                        ++ ","
+                                        ++ radius
+                                        ++ " 0 0,"
+                                        ++ (if deg >= 0 then
+                                                "0"
+                                            else
+                                                "1"
+                                           )
+                                        ++ " "
+                                        ++ (toString xx)
+                                        ++ ","
+                                        ++ (toString yy)
+                                    )
+                                , fill "none"
+                                , stroke "black"
+                                , strokeWidth "0.1"
+                                ]
+                                []
                         ]
-                            ++ if not debug then
+                            ++ if not debug || deg == 0 then
                                 []
                                else
                                 [ line
