@@ -3,6 +3,8 @@
 A tool to interactively visualize FontoBene path expressions / polylines,
 written in [Elm](http://elm-lang.org/).
 
+You can find a hosted version here: https://fontobene.dbrgn.ch/pathvis/
+
 ## Requirements
 
 You need npm and Elm 0.18: https://guide.elm-lang.org/install.html
