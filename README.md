@@ -7,7 +7,7 @@ You can find a hosted version here: https://fontobene.dbrgn.ch/pathvis/
 
 ## Requirements
 
-You need npm and Elm 0.18: https://guide.elm-lang.org/install.html
+You need npm and Elm 0.19: https://guide.elm-lang.org/install.html
 
 If you aren't familiar with Elm yet, you should probably read [the
 tutorial](https://guide.elm-lang.org/).
@@ -15,14 +15,6 @@ tutorial](https://guide.elm-lang.org/).
 To install all dependencies:
 
     make setup
-
-## Building
-
-To build the application, just type
-
-    make dist
-
-The output will be written to the `dist/` directory.
 
 ## Development
 
@@ -32,3 +24,11 @@ To start the dev server:
 
 Now visit [localhost:8000](http://localhost:8000/) in your browser
 to see the application.
+
+## Production
+
+To build the application, just type
+
+    make dist
+
+The output will be written to the `dist/` directory.
