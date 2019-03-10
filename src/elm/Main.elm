@@ -9,12 +9,12 @@ import Svg exposing (Svg, circle, g, line, path, svg)
 import Svg.Attributes exposing (cx, cy, d, fill, height, r, stroke, strokeWidth, viewBox, width, x1, x2, y1, y2)
 
 
-main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
-        , view = view
         , update = update
+        , subscriptions = subscriptions
+        , view = view
         }
 
 
@@ -34,17 +34,28 @@ type alias Model =
     }
 
 
-initialExpr : String
-initialExpr =
-    "1,1;2,7;7,7,6;8,1"
+init : String -> ( Model, Cmd msg )
+init initialExpression =
+    let
+        expr =
+            if String.isEmpty initialExpression then
+                "1,1;2,7;7,7,6;8,1"
+
+            else
+                initialExpression
+
+        model =
+            { coordinates = Maybe.withDefault [] (parseInput expr)
+            , debug = False
+            , expr = expr
+            }
+    in
+    ( model, Cmd.none )
 
 
-init : Model
-init =
-    { coordinates = Maybe.withDefault [] (parseInput initialExpr)
-    , debug = False
-    , expr = initialExpr
-    }
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 
@@ -56,7 +67,7 @@ type Msg
     | ToggleDebug String
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         CoordinateString string ->
@@ -69,10 +80,10 @@ update msg model =
                         Nothing ->
                             []
             in
-            { model | expr = string, coordinates = coordinates }
+            ( { model | expr = string, coordinates = coordinates }, Cmd.none )
 
         ToggleDebug _ ->
-            { model | debug = not model.debug }
+            ( { model | debug = not model.debug }, Cmd.none )
 
 
 parseInput : String -> Maybe (List Coordinate)

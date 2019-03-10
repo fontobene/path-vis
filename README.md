@@ -3,7 +3,7 @@
 A tool to interactively visualize FontoBene path expressions / polylines,
 written in [Elm](http://elm-lang.org/).
 
-You can find a hosted version here: https://fontobene.dbrgn.ch/pathvis/
+You can find a hosted version here: https://fontobene.dbrgn.ch/pathvis/#init=1,1;2,7;7,7,6;8,1
 
 ## Requirements
 
