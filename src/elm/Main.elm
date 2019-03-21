@@ -1,12 +1,14 @@
 module Main exposing (main)
 
+import Basics exposing (ceiling, floor)
 import Browser
 import Html exposing (Html, div, h1, input, label, p, text)
 import Html.Attributes exposing (checked, for, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (combine)
 import Svg exposing (Svg, circle, g, line, path, svg)
-import Svg.Attributes exposing (cx, cy, d, fill, height, r, stroke, strokeWidth, viewBox, width, x1, x2, y1, y2)
+import Svg.Attributes exposing (cx, cy, d, fill, height, opacity, preserveAspectRatio, r, stroke, strokeWidth, viewBox, width, x1, x2, y1, y2)
+import Tuple exposing (first, second)
 
 
 main =
@@ -16,6 +18,42 @@ main =
         , subscriptions = subscriptions
         , view = view
         }
+
+
+
+-- VARIABLES
+
+
+yMin =
+    -4.5
+
+
+yMax =
+    13.5
+
+
+xMin =
+    -0.5
+
+
+xMax =
+    9.5
+
+
+gridColor =
+    "#DDD"
+
+
+zeroXColor =
+    "#0D0"
+
+
+baselineColor =
+    "#00D"
+
+
+capHeightColor =
+    "#D00"
 
 
 
@@ -144,7 +182,7 @@ view model =
             [ input [ id "cbxDebug", type_ "checkbox", checked model.debug, onInput ToggleDebug ] []
             , label [ for "cbxDebug" ] [ text "Debug" ]
             ]
-        , svg [ height "200", width "200", viewBox "-0.5 -0.5 10 10" ]
+        , svg [ height "300", width "300", viewBox "-0.5 -4.5 10 18", preserveAspectRatio "xMinYMin meet" ]
             [ makeGrid
             , drawPolyline model.debug model.coordinates
             , circle [ cx "20", cy "20", r "4" ] []
@@ -157,43 +195,73 @@ makeGrid =
     g [] (makeGridHorizontal ++ makeGridVertical)
 
 
-gridColor : String
-gridColor =
-    "#DDD"
+makeReferenceLine : ( Float, Float ) -> ( Float, Float ) -> String -> Svg Msg
+makeReferenceLine x y color =
+    line
+        [ x1 <| String.fromFloat <| first x
+        , y1 <| String.fromFloat <| second x
+        , x2 <| String.fromFloat <| first y
+        , y2 <| String.fromFloat <| second y
+        , stroke color
+        , strokeWidth "0.1"
+        , opacity "0.6"
+        ]
+        []
 
 
+{-| Horizontal grid (vertical lines)
+-}
 makeGridHorizontal : List (Svg Msg)
 makeGridHorizontal =
-    List.map
-        (\x ->
-            line
-                [ x1 <| String.fromInt x
-                , y1 "0"
-                , x2 <| String.fromInt x
-                , y2 "9"
-                , stroke gridColor
-                , strokeWidth "0.1"
-                ]
-                []
-        )
-        (List.range 0 9)
+    let
+        grid =
+            List.map
+                (\x ->
+                    line
+                        [ x1 <| String.fromInt x
+                        , y1 <| String.fromFloat yMin
+                        , x2 <| String.fromInt x
+                        , y2 <| String.fromFloat yMax
+                        , stroke gridColor
+                        , strokeWidth "0.1"
+                        ]
+                        []
+                )
+                (List.range 0 9)
+
+        zeroXLine =
+            makeReferenceLine ( 0, yMin ) ( 0, yMax ) zeroXColor
+    in
+    grid ++ [ zeroXLine ]
 
 
+{-| Vertical grid (horizontal lines)
+-}
 makeGridVertical : List (Svg Msg)
 makeGridVertical =
-    List.map
-        (\y ->
-            line
-                [ x1 "0"
-                , y1 <| String.fromInt y
-                , x2 "9"
-                , y2 <| String.fromInt y
-                , stroke gridColor
-                , strokeWidth "0.1"
-                ]
-                []
-        )
-        (List.range 0 9)
+    let
+        grid =
+            List.map
+                (\y ->
+                    line
+                        [ x1 <| String.fromFloat xMin
+                        , y1 <| String.fromInt y
+                        , x2 <| String.fromFloat xMax
+                        , y2 <| String.fromInt y
+                        , stroke gridColor
+                        , strokeWidth "0.1"
+                        ]
+                        []
+                )
+                (List.range (ceiling yMin) (floor yMax))
+
+        baseline =
+            makeReferenceLine ( 0, 9 ) ( 9, 9 ) baselineColor
+
+        capHeight =
+            makeReferenceLine ( 0, 0 ) ( 9, 0 ) capHeightColor
+    in
+    grid ++ [ baseline, capHeight ]
 
 
 drawPolyline : Bool -> List Coordinate -> Svg Msg
